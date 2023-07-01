@@ -8,7 +8,7 @@
 {% block content %}
    <a class="action" href="{{ url_for('calcaddr.calc') }}">Reload</a>
 
-   <form action="/calcaddr/cna" method="POST">
+   <form action="/cna" method="POST">
       <h1>Question</h1>
       <textarea name="ipaddrs" id="body" required></textarea>
       <input type="submit" name="submit" value="calc">
