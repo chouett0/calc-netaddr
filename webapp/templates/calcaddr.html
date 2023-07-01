@@ -1,0 +1,28 @@
+
+{%  extends 'base.html' %}
+
+{% block header %}
+   <h1>{% block title %}Calc Network Address{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+   <a class="action" href="{{ url_for('calcaddr.calc') }}">Reload</a>
+
+   <form action="/calcaddr/cna" method="POST">
+      <h1>Question</h1>
+      <textarea name="ipaddrs" id="body" required></textarea>
+      <input type="submit" name="submit" value="calc">
+   </form>
+
+   <h1>Answer</h1>
+   {% if answer %}
+   <article class="post">
+      <header>
+         <div>
+            <p class="body">{{ answer }}</p>
+         </div>
+      </header>
+   </article>
+   {% endif %}
+
+{% endblock %}
