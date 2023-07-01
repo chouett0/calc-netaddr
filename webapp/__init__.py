@@ -48,7 +48,7 @@ class ChatGPT:
 		return res
 
 
-@app.route('/calc', methods=('GET', 'POST'))
+@calcaddr_bp.route('/calc', methods=('GET', 'POST'))
 def calc():
 	gpt = ChatGPT()
 	error = ""
@@ -104,6 +104,33 @@ def create_app(test_config=None):
    @app.route('/test')
    def test():
       return "OK"
+
+   @app.route('/calc', methods=('GET', 'POST'))
+   def calc():
+      gpt = ChatGPT()
+      error = ""
+
+      if ( request.method == 'POST' ):
+         if ( 'ipaddrs' not in request.form ):
+            error = 'No Paramater Found.'
+
+         addr_data = request.form['ipaddrs']
+
+         if ( addr_data is not None ):
+            addr_list = re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[1-3]?\d', addr_data)
+            if ( len(addr_list) == 0 ):
+               error = "IP Address is Not Found."
+
+            else:
+               res = gpt.calcNetworkAddr(addr_list)
+               return render_template('calcaddr.html', answer=res)
+
+         else:
+            error = "IP Address is Not Set."
+
+         flash(error)
+
+      return render_template('calcaddr.html')
 
 
    return app 
