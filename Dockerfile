@@ -1,15 +1,12 @@
-FROM python:3
-RUN apt-get update 
-RUN apt-get install -y locales && \
-	localdef -f UTF-8 -i ja_IP ja_IP.UTF-8
-ENV LANG ja_JP.UTF-8
-ENV LANGUAGE ja_JP:ja
-ENV LC_ALL ja_JP.UTF-8
-ENV TZ JST-9
+FROM python:3.10.9
 
 RUN mkdir /code
-COPY webapp/ /code/
+WORKDIR /code
+COPY . /code/
+RUN pip install -r requirements.txt
 
-RUN pip install --upgrade pip
-RUN pip install --upgrade setuptools
+ENV FLASK_APP=webapp
+ENV secret_key=__REPLASEIT__
+ENV openai_key=__REPLASEIT__
 
+ENTRYPOINT ["flask", "run", "-h", "0.0.0.0"]
