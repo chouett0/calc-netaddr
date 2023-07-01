@@ -48,7 +48,7 @@ class ChatGPT:
 		return res
 
 
-@calcaddr_bp.route('/calc', methods=('GET', 'POST'))
+@app.route('/calc', methods=('GET', 'POST'))
 def calc():
 	gpt = ChatGPT()
 	error = ""
