@@ -61,19 +61,30 @@ class CalcIPAddress:
 
 		self.ip_bin		= ''
 		self.prefix 	= ''
+		self.common_subnet = ''
+		self.subnet_list = []
 		self.can_use_ip = 0
+
+	def _bin2addr(self, addr_bin):
+		addr = ''
+
+		for i in range(0, 32, 8):
+			if ( i == 24 ):
+				addr += str( int('0b' + addr_bin[i:i+8], 0) )
+			else:
+				addr += str( int('0b' + addr_bin[i:i+8], 0) ) + '.'
+
+		return addr
+
 
 	## サブネット
 	def calcSubnet(self):
 		self.subnet		= ''
 
 		self.subnet_bin = '1'*int(self.prefix) + '0'*(32 - self.prefix)
-		for i in range(0, 32, 8):
-			if ( i == 24 ):
-				self.subnet += str(int('0b' + self.subnet_bin[i:i+8], 0))
-			else:
-				self.subnet += str(int('0b' + self.subnet_bin[i:i+8], 0)) + '.'
+		self.subnet = self._bin2addr(self.subnet_bin)
 
+		self.subnet_list.append(self.subnet_bin)
 
 
 	## ネットワークアドレス
@@ -81,11 +92,7 @@ class CalcIPAddress:
 		self.netaddr	= ''
 
 		self.netaddr_bin = bin(int('0b' + self.subnet_bin, 0) & int('0b' + self.ip_bin, 0))[2:].zfill(32)
-		for i in range(0, 32, 8):
-			if ( i == 24 ):
-				self.netaddr += str( int('0b' + self.netaddr_bin[i:i+8], 0) )
-			else:
-				self.netaddr += str( int('0b' + self.netaddr_bin[i:i+8], 0) ) + '.'
+		self.netaddr = self._bin2addr(self.netaddr_bin)
 
 
 	## ブロードキャストアドレス
@@ -94,11 +101,14 @@ class CalcIPAddress:
 
 		self.can_use_ip = int('0b' + str(('1'*(32 - self.prefix)).zfill(32)), 0) - 1
 		self.bcaddr_bin = bin(int('0b' + self.netaddr_bin, 0) | int('0b' + str(('1'*(32 - self.prefix)).zfill(32)), 0))[2:].zfill(32)
-		for i in range(0, 32, 8):
-			if ( i == 24 ):
-				self.bcaddr += str( int('0b' + self.bcaddr_bin[i:i+8], 0) )
-			else:
-				self.bcaddr += str( int('0b' + self.bcaddr_bin[i:i+8], 0) ) + '.'
+		self.bcaddr = self._bin2addr(self.bcaddr_bin)
+
+
+	def calcCommonSubnet(self):
+		self.common_subnet = self.subnet_list[0]
+
+		for i in range(1, len(self.subnet_list)):
+			self.common_subnet = bin(int('0b' + self.common_subnet, 0) & int('0b' + self.subnet_list[i], 0))[2:]
 
 
 	def calc(self, addr_list):
@@ -131,8 +141,11 @@ class CalcIPAddress:
 			self.calcSubnet()
 			self.calcNetworkAddress()
 			self.calcBroadcastAddress()
+			self.calcCommonSubnet()
 
 			result += 'IP Address: {}\nSubnet Mask: {}\nNetwork Address: {}\nBroadcast Address: {}\nCan Use IP Address: {}\n\n'.format(addr, self.subnet, self.netaddr, self.bcaddr, self.can_use_ip)
+
+		result += 'Common CIDR: {}'.format(self._bin2addr(self.common_subnet))
 
 		return result
 
